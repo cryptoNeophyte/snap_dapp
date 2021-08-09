@@ -1,73 +1,146 @@
-import React, { Component } from "react";
-import SimpleStorageContract from "./contracts/SimpleStorage.json";
-import getWeb3 from "./getWeb3";
+import './App.css'
+import 'bootstrap/dist/css/bootstrap.min.css'
+import React, { useEffect, useState } from 'react'
 
-import "./App.css";
+import Web3 from 'web3'
+import SnapDappAbi from './contracts/SnapDapp.json'
 
-class App extends Component {
-  state = { storageValue: 0, web3: null, accounts: null, contract: null };
+import Navbar from './components/Navbar'
+import HomePage from './pages/HomePage'
 
-  componentDidMount = async () => {
+function App() {
+  const [currentAccount, setCurrentAccount] = useState('')
+  const [loading, setLoader] = useState(true)
+  const [hasEthereumAccount, setAccountState] = useState(true)
+  const [contract, setContract] = useState()
+  const [stateChangeFlag, setStateChangeFlag] = useState(0)
+  const [web3Final, setWeb3] = useState(null)
+
+  // error handling
+  const [error, setError] = useState('')
+
+  // setting using getter function of smart contract
+  const [contractOwner, setContractOwner] = useState('')
+  const [contractBalance, setContractBalance] = useState(0)
+  const [imageCount, setImageCount] = useState(0)
+  const [name, setName] = useState('')
+
+  useEffect(() => {
+    loadWeb3()
+    LoadBlockchainData()
+  }, [currentAccount, stateChangeFlag])
+
+  function stateChange() {
+    setStateChangeFlag(stateChangeFlag + 1)
+  }
+
+  async function loadWeb3Account(provider) {
     try {
-      // Get network provider and web3 instance.
-      const web3 = await getWeb3();
+      const web3 = provider
 
-      // Use web3 to get the user's accounts.
-      const accounts = await web3.eth.getAccounts();
+      const accounts = await web3.eth.getAccounts()
+      const account = accounts[0]
+      setCurrentAccount(account)
+      console.log('account', account)
 
-      // Get the contract instance.
-      const networkId = await web3.eth.net.getId();
-      const deployedNetwork = SimpleStorageContract.networks[networkId];
-      const instance = new web3.eth.Contract(
-        SimpleStorageContract.abi,
-        deployedNetwork && deployedNetwork.address,
-      );
+      setWeb3(web3)
 
-      // Set web3, accounts, and contract to the state, and then proceed with an
-      // example of interacting with the contract's methods.
-      this.setState({ web3, accounts, contract: instance }, this.runExample);
-    } catch (error) {
-      // Catch any errors for any of the above operations.
-      alert(
-        `Failed to load web3, accounts, or contract. Check console for details.`,
-      );
-      console.error(error);
+      return web3
+    } catch (err) {
+      console.log(err)
     }
-  };
+  }
 
-  runExample = async () => {
-    const { accounts, contract } = this.state;
+  async function loadWeb3() {
+    // console.log('window.ethereum', window.ethereum)
+    // console.log('window.web3', window.web3)
 
-    // Stores a given value, 5 by default.
-    await contract.methods.set(5).send({ from: accounts[0] });
+    if (window.ethereum) {
+      window.web3 = new Web3(window.ethereum)
 
-    // Get the value from the contract to prove it worked.
-    const response = await contract.methods.get().call();
-
-    // Update state with the result.
-    this.setState({ storageValue: response });
-  };
-
-  render() {
-    if (!this.state.web3) {
-      return <div>Loading Web3, accounts, and contract...</div>;
+      await window.ethereum.enable() // here metamask will connect to our fullstack app
+      await loadWeb3Account(window.web3)
+    } else if (window.web3) {
+      window.web3 = new Web3(window.web3.currentProvider)
+      await loadWeb3Account(window.web3)
+    } else {
+      window.alert('Non Ethereum browser detected! please use metamask.')
+      setAccountState(false)
     }
+  }
+
+  async function LoadBlockchainData() {
+    try {
+      setError('')
+      setLoader(true)
+      const web3 = await loadWeb3Account(window.web3)
+
+      console.log('web3 ===> ', web3)
+      console.log('web3Final ====> ', web3Final)
+
+      const networkId = await web3.eth.net.getId()
+      console.log('networkId', networkId)
+
+      const networkData = SnapDappAbi.networks[networkId]
+      console.log('networkData', networkData)
+
+      if (networkData) {
+        // console.log('SnapDappAbi.abi', SnapDappAbi.abi)
+        // console.log('networkData.address', networkData.address)
+
+        // fetching snapDapp contract
+        const snapDapp = new web3.eth.Contract(
+          SnapDappAbi.abi,
+          networkData.address,
+        )
+        console.log('snapDapp ---> ', snapDapp)
+
+        setContract(snapDapp)
+
+        // fetching contract owner address
+        const contractOwner = await snapDapp.methods.contractOwner().call()
+        setContractOwner(contractOwner)
+
+        // fetching contract balance
+        const contractBalance = await snapDapp.methods.getBalance().call()
+        setContractBalance(contractBalance)
+
+        // fetching image count
+        const imageCount = await snapDapp.methods.imageCount().call()
+        setImageCount(imageCount)
+
+        // fetching name of contract
+        const name = await snapDapp.methods.name().call()
+        setName(name)
+      } else {
+        setError('The smart contract is not deployed to current network!')
+        window.alert('The smart contract is not deployed to current network!')
+      }
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+  async function Connect() {
+    // console.log('connect to metamask!')
+    loadWeb3()
+  }
+
+  if (hasEthereumAccount || !loading) {
     return (
       <div className="App">
-        <h1>Good to Go!</h1>
-        <p>Your Truffle Box is installed and ready.</p>
-        <h2>Smart Contract Example</h2>
-        <p>
-          If your contracts compiled and migrated successfully, below will show
-          a stored value of 5 (by default).
-        </p>
-        <p>
-          Try changing the value stored on <strong>line 42</strong> of App.js.
-        </p>
-        <div>The stored value is: {this.state.storageValue}</div>
+        {error && <h2>{error}</h2>}
+        <Navbar currentAccount={currentAccount} connect={Connect} />
+        <HomePage
+          contract={contract}
+          currentAccount={currentAccount}
+          stateChange={stateChange}
+        />
       </div>
-    );
+    )
+  } else {
+    return <h3>Loading...</h3>
   }
 }
 
-export default App;
+export default App
