@@ -1,4 +1,4 @@
-const SnapDapp = artifact.require('SnapDapp')
+const SnapDapp = artifacts.require('SnapDapp')
 // in our case artifacts is the directory client/src/contracts (which contains json files of all the contract after compiling)
 // SnapDapp is the name of contract
 
