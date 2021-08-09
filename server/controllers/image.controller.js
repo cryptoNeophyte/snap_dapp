@@ -10,11 +10,16 @@ const fs = require('fs')
  * @access          Public
  */
 exports.uploadImage = asyncHandler(async (req, res, next) => {
+  console.log('req.body ===> ', req.body)
+  console.log('req.param ===> ', req.params.address)
+  console.log('req.files ===> ', req.files)
   const { address } = req.params
-  const { imgId } = req.body
+  const { imgId, description } = req.body
 
-  if (!address || !imgId) {
-    return next(new ErrorResponse('address and imgId are required!'))
+  if (!address || !imgId || !description) {
+    return next(
+      new ErrorResponse('address, description and imgId are required!'),
+    )
   }
 
   if (!req.files) {
@@ -36,17 +41,17 @@ exports.uploadImage = asyncHandler(async (req, res, next) => {
   let data = fs.readFileSync(image.tempFilePath)
   let imageURL = await uploadImageToIPFS(data, image)
 
-  await Image.create({
+  const uploadedImage = await Image.create({
     authorAddress: address,
     ownerAddress: address,
     imageLink: imageURL,
     imgId,
+    description,
   })
 
-  const images = await Image.find()
   res.status(201).json({
     success: true,
-    data: images,
+    image: uploadedImage,
   })
 })
 

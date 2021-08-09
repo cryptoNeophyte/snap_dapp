@@ -1,6 +1,7 @@
 import React from 'react'
 
-function HomePage() {
+function HomePage({ images }) {
+  console.log(images)
   return <div>Home</div>
 }
 

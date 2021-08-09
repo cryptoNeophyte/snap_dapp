@@ -26,13 +26,18 @@ function Navbar({ currentAccount, connect }) {
         <div className="collapse navbar-collapse" id="navbarSupportedContent">
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
             <li className="nav-item">
+              <NavLink to="/upload_image" className="nav-link active">
+                Upload Image
+              </NavLink>
+            </li>
+            <li className="nav-item">
               <NavLink to="/uploaded" className="nav-link active">
                 Uploaded
               </NavLink>
             </li>
             <li className="nav-item">
               <NavLink to="/bought" className="nav-link active">
-                Bought
+                My Images
               </NavLink>
             </li>
             <li className="nav-item">

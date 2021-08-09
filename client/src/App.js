@@ -1,18 +1,22 @@
 import './App.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import React, { useEffect, useState } from 'react'
+import { Route, Redirect, Switch } from 'react-router-dom'
 
 import Web3 from 'web3'
 import SnapDappAbi from './contracts/SnapDapp.json'
 
 import Navbar from './components/Navbar'
 import HomePage from './pages/HomePage'
+import UploadImage from './pages/UploadImage'
 
 function App() {
-  const [currentAccount, setCurrentAccount] = useState('')
   const [loading, setLoader] = useState(true)
   const [hasEthereumAccount, setAccountState] = useState(true)
+
+  const [currentAccount, setCurrentAccount] = useState('')
   const [contract, setContract] = useState()
+
   const [stateChangeFlag, setStateChangeFlag] = useState(0)
   const [web3Final, setWeb3] = useState(null)
 
@@ -20,10 +24,11 @@ function App() {
   const [error, setError] = useState('')
 
   // setting using getter function of smart contract
+  const [name, setName] = useState('')
   const [contractOwner, setContractOwner] = useState('')
   const [contractBalance, setContractBalance] = useState(0)
   const [imageCount, setImageCount] = useState(0)
-  const [name, setName] = useState('')
+  const [images, setImages] = useState([])
 
   useEffect(() => {
     loadWeb3()
@@ -109,6 +114,13 @@ function App() {
         const imageCount = await snapDapp.methods.imageCount().call()
         setImageCount(imageCount)
 
+        // Now fetch all images one by one and add in the imagesList(because this is the only method)
+        // TODO:
+        for (let i = 1; i <= imageCount; i++) {
+          const image = await snapDapp.methods.images(i).call()
+          setImages([...images, image])
+        }
+
         // fetching name of contract
         const name = await snapDapp.methods.name().call()
         setName(name)
@@ -131,11 +143,26 @@ function App() {
       <div className="App">
         {error && <h2>{error}</h2>}
         <Navbar currentAccount={currentAccount} connect={Connect} />
-        <HomePage
-          contract={contract}
-          currentAccount={currentAccount}
-          stateChange={stateChange}
-        />
+
+        <Switch>
+          <Route exact path="/">
+            <HomePage
+              contract={contract}
+              currentAccount={currentAccount}
+              stateChange={stateChange}
+              images={images}
+            />
+          </Route>
+          <Route exact path="/upload_image">
+            <UploadImage
+              address={currentAccount}
+              stateChange={stateChange}
+              imageCount={imageCount}
+              snapDapp={contract}
+            />
+          </Route>
+          <Redirect to="/" />
+        </Switch>
       </div>
     )
   } else {
