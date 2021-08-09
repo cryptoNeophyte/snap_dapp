@@ -73,7 +73,12 @@ function UploadImage({ snapDapp, address, imageCount }) {
       if (data.success) {
         const hash = data.image.imageLink
         const desc = data.image.description
-        const minimumSellingPrice = minSellingPrice * 1000000000000000000 // converting ether into wei
+        const minimumSellingPrice = window.web3.utils.toWei(
+          `${minSellingPrice}`,
+          'Ether',
+        ) // converting ether into wei
+
+        console.log('minimumSellingPrice ==> ', minimumSellingPrice)
         const wantToSell = isSelling
         const imageMongooseId = data.image._id // will do something with it in future
 
