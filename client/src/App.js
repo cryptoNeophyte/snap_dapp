@@ -121,7 +121,8 @@ function App() {
           const image = await snapDapp.methods.images(i).call()
           tempImage.push(image)
         }
-        console.log(tempImage)
+
+        // console.log(tempImage)
         // console.log(tempImage[0].description)
         setImages(tempImage)
 
