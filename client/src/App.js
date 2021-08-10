@@ -116,10 +116,14 @@ function App() {
 
         // Now fetch all images one by one and add in the imagesList(because this is the only method)
         // TODO:
-        for (let i = 1; i <= imageCount; i++) {
+        const tempImage = []
+        for (let i = imageCount; i >= 1; i--) {
           const image = await snapDapp.methods.images(i).call()
-          setImages([...images, image])
+          tempImage.push(image)
         }
+        console.log(tempImage)
+        // console.log(tempImage[0].description)
+        setImages(tempImage)
 
         // fetching name of contract
         const name = await snapDapp.methods.name().call()
@@ -147,8 +151,8 @@ function App() {
         <Switch>
           <Route exact path="/">
             <HomePage
-              contract={contract}
-              currentAccount={currentAccount}
+              snapDapp={contract}
+              address={currentAccount}
               stateChange={stateChange}
               images={images}
             />

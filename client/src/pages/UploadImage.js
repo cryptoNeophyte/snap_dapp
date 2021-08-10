@@ -4,7 +4,7 @@ import Loader from '../components/Loader'
 import './styles/uploadImage.scss'
 import { useHistory } from 'react-router-dom'
 
-function UploadImage({ snapDapp, address, imageCount }) {
+function UploadImage({ snapDapp, address, imageCount, stateChange }) {
   const history = useHistory()
   const [loading, setLoader] = useState(false)
   const [description, setDescription] = useState('')
@@ -54,7 +54,7 @@ function UploadImage({ snapDapp, address, imageCount }) {
       setLoader(true)
       console.log('call server and submit file to ipfs')
 
-      let imgId = imageCount + 1
+      let imgId = Number(imageCount) + 1
 
       const uploadURL = `${process.env.REACT_APP_SERVER_URL}/image/${address}`
 
@@ -89,17 +89,30 @@ function UploadImage({ snapDapp, address, imageCount }) {
             console.log('uploaded')
             setLoader(false)
             resetForm()
-            alert('image successfully uploaded!')
+            alert(
+              'image successfully uploaded! It may take 2-5 minutes to load your image on home page',
+            )
             history.push('/')
+            stateChange() // state change is a dependency of useEffect at App.js. calling this will trigger useEffect and fetch new data
           })
           .catch((err) => {
             alert(err.message)
             console.log(err)
+            //if unsuccessful then delete this data from the backend server // TODO: will make it more secure
+            axios.delete(
+              `${process.env.REACT_APP_SERVER_URL}/image/${imageMongooseId}`,
+              {
+                headers: {
+                  authorization: `Bearer ${process.env.REACT_APP_CONTRACT_TOKEN}`,
+                },
+              },
+            )
+            // for avoiding focus error I am doing following things
+            ref.current.value = ''
+            setImageValue(null)
+            setImageSource('')
+            setImageName('No file chosen')
           })
-        // .on('transactionHash', (hash) => {
-
-        //   // TODO: if unsuccessful then delete this data from the backend server
-        // })
         setLoader(false)
       } else {
         alert('ERROR!')

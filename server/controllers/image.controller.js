@@ -10,9 +10,9 @@ const fs = require('fs')
  * @access          Public
  */
 exports.uploadImage = asyncHandler(async (req, res, next) => {
-  console.log('req.body ===> ', req.body)
-  console.log('req.param ===> ', req.params.address)
-  console.log('req.files ===> ', req.files)
+  // console.log('req.body ===> ', req.body)
+  // console.log('req.param ===> ', req.params.address)
+  // console.log('req.files ===> ', req.files)
   const { address } = req.params
   const { imgId, description } = req.body
 
@@ -52,6 +52,36 @@ exports.uploadImage = asyncHandler(async (req, res, next) => {
   res.status(201).json({
     success: true,
     image: uploadedImage,
+  })
+})
+
+/**
+ * @desc            DELETE IMAGE (when image link is not saved in blockchain)
+ * @route           DELETE /api/v1/image/:id
+ * @access          Public
+ */
+exports.deleteImage = asyncHandler(async (req, res, next) => {
+  let token
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer')
+  ) {
+    // Set token from bearer token in header
+    token = req.headers.authorization.split(' ')[1]
+  }
+
+  const contractToken = process.env.CONTRACT_TOKEN
+
+  // TODO: WILL MAKE IT MORE SECURE
+  if (!token || token !== contractToken) {
+    return next(new ErrorResponse('Not authorized to access this route!', 401))
+  }
+
+  await Image.findByIdAndDelete(req.params.id)
+  res.status(201).json({
+    success: true,
+    message:
+      'image successfully deleted! well it is uploaded to ipfs and its permanent. :|',
   })
 })
 
