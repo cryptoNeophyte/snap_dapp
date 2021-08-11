@@ -4,7 +4,7 @@ import MinLoader from '../components/MinLoader'
 
 const LazyImg = React.lazy(() => import('../components/ImageCard'))
 
-function HomePage({ images }) {
+function HomePage({ images, address, snapDapp, stateChange }) {
   return (
     <div className="home-page">
       {images && images.length > 0 ? (
@@ -12,7 +12,13 @@ function HomePage({ images }) {
           <div className="image-card" key={item.id}>
             <Suspense fallback={<MinLoader />}>
               {/* <ImageCard image={item} />   */}
-              <LazyImg image={item.hash} />
+              <LazyImg
+                src={item.hash}
+                image={item}
+                address={address}
+                snapDapp={snapDapp}
+                stateChange={stateChange}
+              />
             </Suspense>
           </div>
         ))

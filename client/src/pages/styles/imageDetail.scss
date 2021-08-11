@@ -1,0 +1,15 @@
+.detail-page{
+    .img-info{
+        display: flex;
+        .img-box{
+            flex: 1;
+            img{
+                height: auto;
+                width: 100%;
+            }
+        }
+        .info-box{
+            flex: 1
+        }
+    }
+}

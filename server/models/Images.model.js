@@ -50,6 +50,9 @@ const ImageSchema = new mongoose.Schema({
       },
     },
   ],
+  tippers: {
+    type: Object, // address ==> {tipValue, time}
+  },
 })
 
 module.exports = mongoose.model('Image', ImageSchema)

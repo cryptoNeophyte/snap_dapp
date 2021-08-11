@@ -9,6 +9,7 @@ import SnapDappAbi from './contracts/SnapDapp.json'
 import Navbar from './components/Navbar'
 import HomePage from './pages/HomePage'
 import UploadImage from './pages/UploadImage'
+import ImageDetailPage from './pages/ImageDetailPage'
 
 function App() {
   const [loading, setLoader] = useState(true)
@@ -163,6 +164,13 @@ function App() {
               address={currentAccount}
               stateChange={stateChange}
               imageCount={imageCount}
+              snapDapp={contract}
+            />
+          </Route>
+          <Route exact path="/image/:id">
+            <ImageDetailPage
+              address={currentAccount}
+              stateChange={stateChange}
               snapDapp={contract}
             />
           </Route>

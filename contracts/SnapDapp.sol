@@ -85,15 +85,16 @@ receive() exists?  fallback()
         address author
     );
 
+  // image buying request
+    event ImageRequest(
+        string msg, 
+        string actionType
+    );
+
   // event to emit when image is bought
     event ImageBought(
-        uint id,
-        string hash, 
-        string description,
-        uint tipAmount,
-        uint minSellingPrice,
-        address author,
-        address imgOwner
+        string msg, 
+        string actionType
     );
 
     // post image
@@ -243,7 +244,9 @@ receive() exists?  fallback()
             
             _image.requests[msg.sender] = 0; 
             
+            emit ImageBought('Hurray! Image is yours!', 'buy');
             return data;
+                    
         }else{
             // create and lock order for buying image at given value
             _image.requests[msg.sender] = msg.value;  
@@ -259,6 +262,7 @@ receive() exists?  fallback()
             require(sent, "Failed to send ETH!");
             
             _image.bidderCount++; 
+            emit ImageRequest('Order Placed Successfuly!', 'buy');
             return data;
         }
     }

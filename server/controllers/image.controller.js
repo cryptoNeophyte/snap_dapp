@@ -3,6 +3,7 @@ const asyncHandler = require('../middleware/async')
 const Image = require('../models/Images.model')
 const uploadImageToIPFS = require('../utils/ipfsImageUpload')
 const fs = require('fs')
+const { findByIdAndUpdate } = require('../models/Images.model')
 
 /**
  * @desc            UPLOAD IMAGE
@@ -148,5 +149,166 @@ exports.getImageByImgId = asyncHandler(async (req, res, next) => {
   res.status(201).json({
     success: true,
     data: image,
+  })
+})
+
+// --------BLOCKCHAIN-----------------------------
+
+/**
+ * @desc            add tipper
+ * @route           PUT/api/v1/image/tipper/:imgId/:address
+ * @access          Public
+ */
+exports.addTipper = asyncHandler(async (req, res, next) => {
+  const { address, imgId } = req.params
+  const { value } = req.body
+  let image = await Image.findOne({ imgId: imgId })
+
+  if (!image) {
+    return res.status(200).json({
+      success: false,
+      data: `no image with the imgId of ${imgId}`,
+    })
+  }
+
+  let tipper = { ...image.tipper }
+
+  // check if tipper has tipped before
+  if (tipper[address]) {
+    tipper[address] = {
+      tipValue: tipper[address].tipValue + value,
+      time: tipper[address.time] + 1,
+    }
+  } else {
+    tipper[address] = {
+      tipValue: value,
+      time: 1,
+    }
+  }
+
+  image = await Image.findByIdAndUpdate(image._id, { tipper })
+
+  res.status(200).json({
+    success: true,
+    data: image,
+    message: 'successfully tipped!',
+  })
+})
+
+/**
+ * @desc            add request with address and value at requests field and also add it to buyers list
+ * if buyer is already added then no need to add him again (apply some logic)
+ * @route           PUT/api/v1/image/request/:imgId/:address
+ * @access          Public
+ */
+exports.addRequest = asyncHandler(async (req, res, next) => {
+  const { address, imgId } = req.params
+  const { value } = req.body
+  let image = await Image.findOne({ imgId: imgId })
+
+  if (!image) {
+    return res.status(200).json({
+      success: false,
+      data: `no image with the imgId of ${imgId}`,
+    })
+  }
+
+  // // check if this buyer is already in the list or not
+  // let buyers = [...image.buyers]
+  // let isPresent = false
+  // for (let item of buyers) {
+  //   if (item === address) isPresent = true
+  //   if (isPresent) break
+  // }
+
+  // if (isPresent) {
+  //   return res.status(200).json({
+  //     success: false,
+  //     data: image,
+  //     message: 'everything up to date!',
+  //   })
+  // }
+
+  let requests = [...image.requests, { address, value }]
+  // add to the list of buyers
+  let buyers = [...image.buyers, address]
+
+  image = await Image.findByIdAndUpdate(image._id, { requests, buyers })
+
+  res.status(200).json({
+    success: true,
+    data: image,
+    message: 'request successfully added!',
+  })
+})
+
+// IF IMAGE IS BOUGHT
+/**
+ * @desc            add request with price, buyerAddress, sellerAddress and newOwner at dealInfo field and also add it to buyers list
+ * if buyer is already added then no need to add him again (apply some logic)
+ * @route           PUT /api/v1/image/bought/:imgId/:address/:sellerAddress
+ * @access          Public
+ */
+exports.addBoughtInfo = asyncHandler(async (req, res, next) => {
+  const { address, imgId, sellerAddress } = req.params
+  const { value } = req.body
+  let image = await Image.findOne({ imgId: imgId })
+
+  if (!image) {
+    return res.status(200).json({
+      success: false,
+      data: `no image with the imgId of ${imgId}`,
+    })
+  }
+
+  const dealInfo = [
+    ...image.dealInfo,
+    {
+      price: value,
+      buyerAddress: address,
+      sellerAddress,
+    },
+  ]
+
+  image = await Image.findByIdAndUpdate(image._id, {
+    dealInfo,
+  })
+
+  res.status(200).json({
+    success: true,
+    data: image,
+    message: 'successfully bought!',
+  })
+})
+
+/**
+ * @desc            remove order
+ * @route           DELETE/api/v1/image/removeOrder/:imgId/:address
+ * @access          Public
+ */
+exports.removeRequest = asyncHandler(async (req, res, next) => {
+  const { address, imgId } = req.params
+  let image = await Image.findOne({ imgId: imgId })
+
+  if (!image) {
+    return res.status(200).json({
+      success: false,
+      data: `no image with the imgId of ${imgId}`,
+    })
+  }
+
+  // get buyers list and remove address
+  let buyers = [...image.buyers]
+  buyers = buyers.map((item) => item !== address)
+
+  let requests = [...image.requests]
+  requests = requests.map((item) => item.address !== address)
+
+  image = await Image.findByIdAndUpdate(image._id, { requests, buyers })
+
+  res.status(200).json({
+    success: true,
+    data: image,
+    message: 'order successfully removed!',
   })
 })
