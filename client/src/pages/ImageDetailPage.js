@@ -266,27 +266,27 @@ function ImageDetailPage({ address, stateChange, snapDapp }) {
                 {image.id}
               </h3>
               <p>
-                <span>Author :</span>
+                <span>Author </span>
                 {image.author}
               </p>
               <p>
-                <span>Owner :</span>
+                <span>Owner </span>
                 {image.imgOwner}
               </p>
+              <p className="desc">{image.description}</p>
               <p>
-                <span>Tip Earned :</span>
+                <span>Tip Earned </span>
                 {window.web3.utils.fromWei(image.tipAmount, 'ether')} ETH
               </p>
               {image.wantToSell ? (
                 <div>
                   <p>
-                    <span>Min Price: </span>
+                    <span>Min Price </span>
                     {window.web3.utils.fromWei(image.minSellingPrice, 'ether')}
                     ETH
                   </p>
                   {image.imgOwner !== address && (
                     <div className="buy-btn">
-                      ETH
                       <input
                         type="number"
                         value={buyAt}
@@ -294,6 +294,7 @@ function ImageDetailPage({ address, stateChange, snapDapp }) {
                         step="0.001"
                         onChange={(event) => setBuyingPrice(event.target.value)}
                       />
+                      ETH
                       <button className="buy" onClick={handleBuy}>
                         BUY
                       </button>
@@ -307,8 +308,8 @@ function ImageDetailPage({ address, stateChange, snapDapp }) {
               )}
               {image.imgOwner !== address && image.author !== address && (
                 <div className="tip-btn">
-                  ETH
                   <input type="text" value={tip} readOnly={true} />
+                  ETH
                   <button className="tip" onClick={handleTip}>
                     TIP
                   </button>
@@ -348,7 +349,11 @@ function ImageDetailPage({ address, stateChange, snapDapp }) {
             </div>
           </div>
           <div className="search-orders">
-            {searched && <button onClick={() => goBack(image.id)}>Back</button>}
+            {searched && (
+              <button className="go-btn" onClick={() => goBack(image.id)}>
+                Back
+              </button>
+            )}
 
             <div>
               <input
@@ -373,7 +378,7 @@ function ImageDetailPage({ address, stateChange, snapDapp }) {
                 <tbody>
                   {orders.map((item) => (
                     <tr key={item.address}>
-                      <td>{item.address}</td>
+                      <td className="address-td">{item.address}</td>
                       <td>
                         {window.web3.utils.fromWei(`${item.value}`, 'ether')}
                       </td>

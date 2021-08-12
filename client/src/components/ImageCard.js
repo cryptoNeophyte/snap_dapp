@@ -107,10 +107,23 @@ function ImageCard({ src, image, address, snapDapp, stateChange }) {
           )} */}
         </div>
 
-        <p>
-          <span>Tips: </span>
-          {window.web3.utils.fromWei(image.tipAmount, 'ether')} ETH
-        </p>
+        <div className="tips-area">
+          <p>
+            <span>Tips: </span>
+            {window.web3.utils.fromWei(image.tipAmount, 'ether')} ETH
+          </p>
+          <div className="btns-area">
+            {image.imgOwner !== address && (
+              <div className="tip-btn">
+                <input type="text" value={tip} readOnly={true} />
+                ETH
+                <button className="tip" onClick={handleTip}>
+                  TIP
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
       <img
         src={src}
@@ -119,17 +132,6 @@ function ImageCard({ src, image, address, snapDapp, stateChange }) {
         height="auto"
         onClick={() => history.push(`/image/${image.id}`)}
       />
-      <div className="btns-area">
-        {image.imgOwner !== address && (
-          <div className="tip-btn">
-            ETH
-            <input type="text" value={tip} readOnly={true} />
-            <button className="tip" onClick={handleTip}>
-              TIP
-            </button>
-          </div>
-        )}
-      </div>
     </div>
   )
 }

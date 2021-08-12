@@ -2,6 +2,8 @@ import React, { useEffect, useState, Suspense } from 'react'
 import MinLoader from '../components/MinLoader'
 // import ImageCard from '../components/ImageCard'
 
+import './styles/homePage.scss'
+
 const LazyImg = React.lazy(() => import('../components/ImageCard'))
 
 function HomePage({ images, address, snapDapp, stateChange }) {
