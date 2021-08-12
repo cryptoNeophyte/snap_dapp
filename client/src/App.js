@@ -159,6 +159,38 @@ function App() {
               images={images}
             />
           </Route>
+          <Route exact path="/uploaded">
+            <HomePage
+              snapDapp={contract}
+              address={currentAccount}
+              stateChange={stateChange}
+              images={images}
+            />
+          </Route>
+          <Route exact path="/my_images">
+            <HomePage
+              snapDapp={contract}
+              address={currentAccount}
+              stateChange={stateChange}
+              images={images}
+            />
+          </Route>
+          <Route exact path="/search/:id">
+            <HomePage
+              snapDapp={contract}
+              address={currentAccount}
+              stateChange={stateChange}
+              images={images}
+            />
+          </Route>
+          <Route exact path="/orders">
+            <HomePage
+              snapDapp={contract}
+              address={currentAccount}
+              stateChange={stateChange}
+              images={images}
+            />
+          </Route>
           <Route exact path="/upload_image">
             <UploadImage
               address={currentAccount}

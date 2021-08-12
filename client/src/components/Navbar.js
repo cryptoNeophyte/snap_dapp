@@ -36,12 +36,12 @@ function Navbar({ currentAccount, connect }) {
               </NavLink>
             </li>
             <li className="nav-item">
-              <NavLink to="/bought" className="nav-link active">
+              <NavLink to="/my_images" className="nav-link active">
                 My Images
               </NavLink>
             </li>
             <li className="nav-item">
-              <NavLink to="/myorders" className="nav-link active">
+              <NavLink to="/orders" className="nav-link active">
                 Orders
               </NavLink>
             </li>

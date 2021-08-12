@@ -2,6 +2,33 @@
     box-sizing: border-box;
     padding: 20px;
     padding-top: 50px;
+    .search-bar{
+        position: relative;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        input, button{
+            border: none;
+            margin: 4px 0;  
+            outline: none;
+            padding: 8px 2px;
+            color: rgba(0, 0, 0, 0.705);
+        }
+        input{
+            border-bottom: 2px solid rgba(130, 78, 199, 0.63);
+            width: 250px;
+            padding-left: 20px;
+        }
+        button{
+            background-color: #fff;
+            cursor: pointer;
+            border-bottom: 2px solid rgba(130, 78, 199, 0.63);
+        }
+        margin-bottom: 50px;
+    }
+    .home-page-images{
+    box-sizing: border-box;
+    padding-top: 50px;
     display: flex;
     flex-wrap: wrap;
     justify-content: space-around;
@@ -52,4 +79,4 @@
             box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.5);
         }
     }
-}
+}}
