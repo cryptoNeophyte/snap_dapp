@@ -113,12 +113,12 @@ exports.getOwnerImage = asyncHandler(async (req, res, next) => {
 })
 
 /**
- * @desc            get single image by id
+ * @desc            get single image by imgId
  * @route           GET /api/v1/image/single/:id
  * @access          Public
  */
 exports.getSingleImage = asyncHandler(async (req, res, next) => {
-  const image = await Image.findById(req.params.id)
+  const image = await Image.findOne({ imgId: req.params.id })
 
   if (!image) {
     return res.status(200).json({
@@ -213,7 +213,7 @@ exports.addRequest = asyncHandler(async (req, res, next) => {
     })
   }
 
-  // // check if this buyer is already in the list or not
+  //// check if this buyer is already in the list or not
   // let buyers = [...image.buyers]
   // let isPresent = false
   // for (let item of buyers) {
@@ -302,7 +302,7 @@ exports.removeRequest = asyncHandler(async (req, res, next) => {
   buyers = buyers.map((item) => item !== address)
 
   let requests = [...image.requests]
-  requests = requests.map((item) => item.address !== address)
+  requests = requests.filter((item) => item.address !== address)
 
   image = await Image.findByIdAndUpdate(image._id, { requests, buyers })
 

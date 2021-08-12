@@ -97,6 +97,11 @@ receive() exists?  fallback()
         string actionType
     );
 
+    // change Price 
+    event ChangePriceOrSell(
+        string msg
+    );
+
     // post image
     function uploadImage(string memory _imgHash, string memory _description,  uint _minSellingPrice, bool _wantToSell) public{
 
@@ -312,7 +317,7 @@ receive() exists?  fallback()
         // fetch the image
         Image storage _image = images[_id];
         
-        require(msg.sender == _image.imgOwner, "yout are not authorized!");
+        require(msg.sender == _image.imgOwner, "you are not authorized!");
         
         if(!_image.wantToSell){
             _image.wantToSell = true;
@@ -327,7 +332,6 @@ receive() exists?  fallback()
         
         // check in the requests if someone wants to buy this image or not at expected price, if yes then sell the image
         while(i < buyersLen && !buyerAvailable){
-            
             address currentAddr = _buyersList[i];
             
             
@@ -351,8 +355,15 @@ receive() exists?  fallback()
                 _image.boughtAt[_image.boughtCount] = [bytes32(uint256(uint160(currentAddr))), bytes32(_minSellingPrice)];
                 
                 _image.requests[currentAddr] = 0; 
+
+                
             }
             i++;
+        }
+        if(buyerAvailable){
+            emit ChangePriceOrSell('Image sold!');
+        }else{
+            emit ChangePriceOrSell('Price Updated!');
         }
         
     }

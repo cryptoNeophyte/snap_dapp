@@ -9,6 +9,11 @@ function ImageDetailPage({ address, stateChange, snapDapp }) {
   const [buyAt, setBuyingPrice] = useState(0)
   const [loading, setLoader] = useState(false)
   const [price, setPrice] = useState(0)
+  const [orders, setOrders] = useState(null)
+  const [searchedReq, setSearchedReq] = useState(null)
+  const [searchedAddress, setSearchedAddress] = useState('')
+  const [searchedMessage, setSearchedMessage] = useState('No orders yet!')
+  const [searched, setSearched] = useState(false)
 
   const BASE_URL = process.env.REACT_APP_SERVER_URL
   const tip = 0.0001 // ETH
@@ -21,6 +26,7 @@ function ImageDetailPage({ address, stateChange, snapDapp }) {
       setImage(img)
       setLoader(false)
       setPrice(window.web3.utils.fromWei(img.minSellingPrice, 'ether'))
+      getAllOrders(img.id)
     }
   }
 
@@ -122,7 +128,11 @@ function ImageDetailPage({ address, stateChange, snapDapp }) {
         .send({ from: address })
         .then((result) => {
           console.log(result)
-          alert('Price Updated!')
+          if (result.events && result.events.ChangePriceOrSell) {
+            let { ChangePriceOrSell } = result.events
+            alert(ChangePriceOrSell.msg)
+          }
+
           setLoader(false)
           stateChange()
         })
@@ -152,6 +162,92 @@ function ImageDetailPage({ address, stateChange, snapDapp }) {
       })
   }
 
+  // TODO:
+  async function getAllOrders(id) {
+    // first I will get all the addresses stored in server
+    // then I will use those addresses one buy one for getter all the orders placed for this picture
+    const { data } = await axios.get(`${BASE_URL}/image/single/${params.id}`)
+    console.log(data)
+
+    if (data.data && data.data.requests && data.data.requests.length > 0) {
+      let requests = data.data.requests
+      console.log(requests)
+
+      let fetchedReqs = []
+
+      //  WITH BLOCKCHAIN NOT BACKEND
+      for (let item of requests) {
+        // console.log(item)
+        const value = await snapDapp.methods.getRequest(id, item.address).call()
+
+        if (Number(value) !== 0) {
+          fetchedReqs.push({
+            address: item.address,
+            value,
+          })
+        }
+      }
+      console.log('fetchedReqs===>', fetchedReqs)
+      setOrders(fetchedReqs)
+    }
+  }
+
+  // TODO:
+  function removeOrder(id) {
+    setLoader(true)
+    snapDapp.methods
+      .removeOrder(id)
+      .send({ from: address })
+      .then((result) => {
+        console.log(result)
+        stateChange()
+        alert('order removed successfully!')
+        setLoader(false)
+      })
+      .catch((err) => {
+        console.log(err)
+        alert('ERROR!')
+        setLoader(false)
+      })
+  }
+
+  function goBack(id) {
+    setSearchedAddress('')
+    setSearchedMessage('No orders yet!')
+    getAllOrders(id)
+    setSearched(false)
+  }
+
+  async function searchByAddress(id) {
+    try {
+      if (searchedAddress && searchedAddress.length > 5) {
+        setLoader(true)
+        let value = await snapDapp.methods
+          .getRequest(id, searchedAddress)
+          .call()
+
+        console.log(typeof value)
+
+        if (value === '0') {
+          setSearchedMessage('NO ORDERS WITH THIS ADDRESS!')
+        } else {
+          setOrders([
+            {
+              address: searchedAddress,
+              value,
+            },
+          ])
+        }
+        setSearched(true)
+        setLoader(false)
+      }
+    } catch (err) {
+      alert('INVALID ADDRESS!')
+      console.log(err)
+      setLoader(false)
+    }
+  }
+
   return loading ? (
     <Loader />
   ) : (
@@ -159,75 +255,68 @@ function ImageDetailPage({ address, stateChange, snapDapp }) {
       {!image ? (
         <h2>NO IMAGE WITH THE ID OF {params.id}</h2>
       ) : (
-        <div className="img-info">
-          <div className="img-box">
-            <img src={image.hash} alt="" />
-          </div>
-          <div className="info-box">
-            <p>
-              <span>Author :</span>
-              {image.author}
-            </p>
-            <p>
-              <span>Owner :</span>
-              {image.imgOwner}
-            </p>
-            <p>
-              <span>Tip Earned :</span>
-              {window.web3.utils.fromWei(image.tipAmount, 'ether')} ETH
-            </p>
-            {image.wantToSell ? (
-              <div>
-                <p>
-                  <span>Min Price: </span>
-                  {window.web3.utils.fromWei(image.minSellingPrice, 'ether')}ETH
-                </p>
-                {image.imgOwner !== address && (
-                  <div className="buy-btn">
+        <>
+          <div className="img-info">
+            <div className="img-box">
+              <img src={image.hash} alt="" />
+            </div>
+            <div className="info-box">
+              <h3>
+                <span>IMAGE ID: </span>
+                {image.id}
+              </h3>
+              <p>
+                <span>Author :</span>
+                {image.author}
+              </p>
+              <p>
+                <span>Owner :</span>
+                {image.imgOwner}
+              </p>
+              <p>
+                <span>Tip Earned :</span>
+                {window.web3.utils.fromWei(image.tipAmount, 'ether')} ETH
+              </p>
+              {image.wantToSell ? (
+                <div>
+                  <p>
+                    <span>Min Price: </span>
+                    {window.web3.utils.fromWei(image.minSellingPrice, 'ether')}
                     ETH
-                    <input
-                      type="number"
-                      value={buyAt}
-                      min="0.001"
-                      step="0.001"
-                      onChange={(event) => setBuyingPrice(event.target.value)}
-                    />
-                    <button className="buy" onClick={handleBuy}>
-                      BUY
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div>
-                <p>NOT FOR SALE</p>
-              </div>
-            )}
-            {image.imgOwner !== address && image.author !== address && (
-              <div className="tip-btn">
-                ETH
-                <input type="text" value={tip} readOnly={true} />
-                <button className="tip" onClick={handleTip}>
-                  TIP
-                </button>
-              </div>
-            )}
-            {image.imgOwner === address && (
-              <div className="handle-owner-work">
-                {!image.wantToSell && (
-                  <div>
-                    ETH
-                    <input
-                      type="number"
-                      value={price}
-                      onChange={(e) => setPrice(e.target.value)}
-                      step="0.001"
-                    />
-                    <button onClick={handleSell}>SELL</button>
-                  </div>
-                )}
-                {image.wantToSell && (
-                  <div>
+                  </p>
+                  {image.imgOwner !== address && (
+                    <div className="buy-btn">
+                      ETH
+                      <input
+                        type="number"
+                        value={buyAt}
+                        min="0.001"
+                        step="0.001"
+                        onChange={(event) => setBuyingPrice(event.target.value)}
+                      />
+                      <button className="buy" onClick={handleBuy}>
+                        BUY
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div>
+                  <p>NOT FOR SALE</p>
+                </div>
+              )}
+              {image.imgOwner !== address && image.author !== address && (
+                <div className="tip-btn">
+                  ETH
+                  <input type="text" value={tip} readOnly={true} />
+                  <button className="tip" onClick={handleTip}>
+                    TIP
+                  </button>
+                </div>
+              )}
+              {image.imgOwner === address && (
+                <div className="handle-owner-work">
+                  {!image.wantToSell && (
                     <div>
                       ETH
                       <input
@@ -236,15 +325,75 @@ function ImageDetailPage({ address, stateChange, snapDapp }) {
                         onChange={(e) => setPrice(e.target.value)}
                         step="0.001"
                       />
-                      <button onClick={handleSell}>CHANGE PRICE</button>
+                      <button onClick={handleSell}>SELL</button>
                     </div>
-                    <button onClick={removeFromSale}>REMOVE FROM SALE</button>
-                  </div>
-                )}
-              </div>
+                  )}
+                  {image.wantToSell && (
+                    <div>
+                      <div>
+                        ETH
+                        <input
+                          type="number"
+                          value={price}
+                          onChange={(e) => setPrice(e.target.value)}
+                          step="0.001"
+                        />
+                        <button onClick={handleSell}>CHANGE PRICE</button>
+                      </div>
+                      <button onClick={removeFromSale}>REMOVE FROM SALE</button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="search-orders">
+            {searched && <button onClick={() => goBack(image.id)}>Back</button>}
+
+            <div>
+              <input
+                type="text"
+                placeholder="address"
+                value={searchedAddress}
+                onChange={(e) => setSearchedAddress(e.target.value)}
+              />
+              <button onClick={() => searchByAddress(image.id)}>Search</button>
+            </div>
+          </div>
+          <div className="all-orders-area">
+            {orders && orders.length > 0 ? (
+              <table>
+                <thead>
+                  <tr>
+                    <th>address</th>
+                    <th>price (ETH)</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {orders.map((item) => (
+                    <tr key={item.address}>
+                      <td>{item.address}</td>
+                      <td>
+                        {window.web3.utils.fromWei(`${item.value}`, 'ether')}
+                      </td>
+
+                      {item.address === address && (
+                        <td>
+                          <button onClick={() => removeOrder(image.id)}>
+                            remove order
+                          </button>
+                        </td>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <h2>{searchedMessage}</h2>
             )}
           </div>
-        </div>
+        </>
       )}
     </div>
   )
