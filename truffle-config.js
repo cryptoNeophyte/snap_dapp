@@ -1,9 +1,9 @@
 const path = require('path')
-// require('dotenv').config({ path: require('find-config')('.env') })
+require('dotenv').config({ path: require('find-config')('.env') })
 
-// const HDWalletProvider = require('@truffle/hdwallet-provider') // Useful for deploying to a public network.
-// const seedPhrase = process.env.MNEMONIC
-// const infuraProjectId = process.env.INFURA_PROJECT_ID
+const HDWalletProvider = require('@truffle/hdwallet-provider') // Useful for deploying to a public network.
+const seedPhrase = process.env.MNEMONIC
+const infuraProjectId = process.env.INFURA_PROJECT_ID
 
 /**
  * Use this file to configure your truffle project. It's seeded with some
@@ -65,58 +65,58 @@ module.exports = {
     // },
     // Useful for deploying to a public network.
     // NB: It's important to wrap the provider as a function.
-    // ropsten: {
-    //   provider: () =>
-    //     new HDWalletProvider(
-    //       seedPhrase,
-    //       `wss://ropsten.infura.io/ws/v3/${infuraProjectId}`,
-    //     ),
-    //   network_id: 3,
-    //   gas: 5500000,
-    //   gasPrice: 10000000000,
-    //   networkCheckTimeout: 10000000,
-    //   confirmations: 2,
-    //   timeoutBlocks: 200,
-    //   skipDryRun: true,
-    // },
-    // kovan: {
-    //   provider: () =>
-    //     new HDWalletProvider(
-    //       seedPhrase,
-    //       `https://kovan.infura.io/v3/${infuraProjectId}`,
-    //     ),
-    //   network_id: 42,
-    //   gas: 6721975,
-    //   gasPrice: 10000000000,
-    //   confirmations: 2,
-    //   timeoutBlocks: 200,
-    //   skipDryRun: true,
-    // },
-    // rinkeby: {
-    //   provider: () =>
-    //     new HDWalletProvider(
-    //       seedPhrase,
-    //       `wss://rinkeby.infura.io/ws/v3/${infuraProjectId}`,
-    //     ),
-    //   network_id: 4,
-    //   gas: 6721975,
-    //   gasPrice: 10000000000,
-    //   networkCheckTimeout: 10000000,
-    //   confirmations: 2,
-    //   timeoutBlocks: 200,
-    //   skipDryRun: true,
-    // },
+    ropsten: {
+      provider: () =>
+        new HDWalletProvider(
+          seedPhrase,
+          `wss://ropsten.infura.io/ws/v3/${infuraProjectId}`,
+        ),
+      network_id: 3,
+      gas: 5500000,
+      gasPrice: 10000000000,
+      networkCheckTimeout: 10000000,
+      confirmations: 2,
+      timeoutBlocks: 200,
+      skipDryRun: true,
+    },
+    kovan: {
+      provider: () =>
+        new HDWalletProvider(
+          seedPhrase,
+          `https://kovan.infura.io/v3/${infuraProjectId}`,
+        ),
+      network_id: 42,
+      gas: 6721975,
+      gasPrice: 10000000000,
+      confirmations: 2,
+      timeoutBlocks: 200,
+      skipDryRun: true,
+    },
+    rinkeby: {
+      provider: () =>
+        new HDWalletProvider(
+          seedPhrase,
+          `wss://rinkeby.infura.io/ws/v3/${infuraProjectId}`,
+        ),
+      network_id: 4,
+      gas: 6721975,
+      gasPrice: 10000000000,
+      networkCheckTimeout: 10000000,
+      confirmations: 2,
+      timeoutBlocks: 200,
+      skipDryRun: true,
+    },
     // main ethereum network(mainnet)
-    // main: {
-    //   provider: () =>
-    //     new HDWalletProvider(
-    //       seedPhrase,
-    //       `https://mainnet.infura.io/v3/${infuraProjectId}`,
-    //     ),
-    //   network_id: 1,
-    //   gas: 6721975,
-    //   gasPrice: 10000000000,
-    // },
+    main: {
+      provider: () =>
+        new HDWalletProvider(
+          seedPhrase,
+          `https://mainnet.infura.io/v3/${infuraProjectId}`,
+        ),
+      network_id: 1,
+      gas: 6721975,
+      gasPrice: 10000000000,
+    },
     // Useful for private networks
     // private: {
     // provider: () => new HDWalletProvider(mnemonic, `https://network.io`),
