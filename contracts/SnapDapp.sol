@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
-pragma experimental ABIEncoderV2;
+// pragma experimental ABIEncoderV2;
 
 contract SnapDapp {
   address public contractOwner; // from solidity 0.8.0 we don't need to declare the address as payable explicitly, but when you rare transferring an amount to such address. 
@@ -107,7 +107,8 @@ receive() exists?  fallback()
 
     // change Price 
     event ChangePriceOrSell(
-        string msg
+        string msg,
+        address imgOwner
     );
 
     // post image
@@ -375,9 +376,9 @@ receive() exists?  fallback()
             i++;
         }
         if(buyerAvailable){
-            emit ChangePriceOrSell('Image sold!');
+            emit ChangePriceOrSell('Image sold!', _image.imgOwner);
         }else{
-            emit ChangePriceOrSell('Price Updated!');
+            emit ChangePriceOrSell('Price Updated!', _image.imgOwner);
         }
         
     }
