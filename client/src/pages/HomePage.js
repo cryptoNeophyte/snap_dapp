@@ -25,7 +25,7 @@ function HomePage({ images, address, snapDapp, stateChange }) {
       } else if (pathname === '/my_images') {
         getImages('owner')
       } else if (pathname === '/orders') {
-        console.log('my orders')
+        getOrders()
       } else if (pathname.startsWith('/search')) {
         handleSearch(params.id)
       } else {
@@ -35,6 +35,20 @@ function HomePage({ images, address, snapDapp, stateChange }) {
     }
   }, [pathname, images])
 
+  async function getOrders() {
+    try {
+      let arr = await snapDapp.methods.getOrders(address).call()
+      let imgs = []
+      for (let item of arr) {
+        let temp = await snapDapp.methods.images(parseInt(item)).call()
+        imgs.push(temp)
+      }
+      setNewImgs(imgs)
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
   async function getImages(type) {
     try {
       let data
@@ -43,9 +57,6 @@ function HomePage({ images, address, snapDapp, stateChange }) {
         data = await axios.get(`${BASE_URL}/image/author/${address}`)
       } else if (type === 'owner') {
         data = await axios.get(`${BASE_URL}/image/owner/${address}`)
-      } else if (type === 'order') {
-        data = await axios.get(`${BASE_URL}/image/owner/${address}`)
-        console.log('orders')
       }
 
       if (data && data.data) {

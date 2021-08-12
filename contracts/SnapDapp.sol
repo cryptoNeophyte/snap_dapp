@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
+pragma experimental ABIEncoderV2;
 
 contract SnapDapp {
   address public contractOwner; // from solidity 0.8.0 we don't need to declare the address as payable explicitly, but when you rare transferring an amount to such address. 
@@ -26,6 +27,13 @@ contract SnapDapp {
       mapping(address => uint) tippedBy; // it will contain address of the people who tipped with amount
       mapping(uint => bytes32[]) boughtAt; // number of times it has beed bought and array with address and amount // FIXME: also with time 
   }
+
+  struct MyOrders{
+    address imgOwner;
+    uint[] imgs;
+  }
+  
+  mapping(address => MyOrders) public orders; 
   
   
   uint public imageCount = 0;
@@ -267,7 +275,13 @@ receive() exists?  fallback()
             require(sent, "Failed to send ETH!");
             
             _image.bidderCount++; 
-            emit ImageRequest('Order Placed Successfuly!', 'buy');
+            
+            MyOrders storage _myorders = orders[msg.sender];
+            _myorders.imgOwner = msg.sender;
+            _myorders.imgs.push(_id);
+            
+            
+            emit ImageRequest('Order Placed Successfuly!', 'req');
             return data;
         }
     }
@@ -370,7 +384,6 @@ receive() exists?  fallback()
     
     
     // TODO: Delete order and get refund
-    
     function removeOrder(uint _imgId) public returns (bytes memory){ 
         require(_imgId > 0 && _imgId <= imageCount);
         
@@ -386,8 +399,29 @@ receive() exists?  fallback()
         require(sent, "Failed to send ETH!");
         
         _image.requests[msg.sender] = 0;
-
+        
+        MyOrders storage _orders =  orders[msg.sender];
+        
+        uint[] memory _imgs = _orders.imgs;
+        uint[] memory tmp = _orders.imgs;
+        
+        for(uint i= 0; i < tmp.length; i++ ){
+            if(tmp[i] == _imgId){
+                delete _imgs[i];
+                _orders.imgs = _imgs;
+                return data;
+            }
+        }
+        
         return data;
+
+        
+    }
+    
+    
+    function getOrders(address _address) external view returns(uint[] memory){
+         MyOrders memory _orders = orders[_address];
+        return _orders.imgs;
     }
 }
 
