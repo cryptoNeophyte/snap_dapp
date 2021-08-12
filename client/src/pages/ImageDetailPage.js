@@ -378,7 +378,9 @@ function ImageDetailPage({ address, stateChange, snapDapp }) {
                 <tbody>
                   {orders.map((item) => (
                     <tr key={item.address}>
-                      <td className="address-td">{item.address}</td>
+                      <td className="address-td">
+                        <p>{item.address}</p>
+                      </td>
                       <td>
                         {window.web3.utils.fromWei(`${item.value}`, 'ether')}
                       </td>

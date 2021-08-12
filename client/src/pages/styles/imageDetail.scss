@@ -11,6 +11,7 @@
                 height: auto;
                 width: 100%;
             }
+            margin-bottom: 20px;
         }
         .info-box{
             flex: 1;
@@ -62,6 +63,7 @@
         width: 100%;
         display: flex;
         justify-content: center;
+        flex-wrap: wrap;
         .go-btn{
             position: absolute;
             left: 0
@@ -76,11 +78,15 @@
         input{
             border-bottom: 2px solid rgb(130, 78, 199);
             width: 300px;
+            font-size: 14px;
         }
         button{
             background-color: #fff;
             cursor: pointer;
             border-bottom: 2px solid rgb(130, 78, 199);
+            font-size: 14px;
+            color:rgb(123, 135, 248);
+            font-weight: 700;
         }
         margin-bottom: 50px;
     }
@@ -124,38 +130,20 @@
         .img-info{
             flex-direction: column;
         }
+        .search-orders{
+            .go-btn{
+                position: relative;
+            }
+        }
         .all-orders-area{
             width: 100%;
             display: flex;
             justify-content: center;
             table{
                 width: 100%;
-                tr , th , td  {
-                    border: 1px solid rgb(130, 78, 199);
-                    padding: 10px;
-                    text-align: center;
-                }
-                .address-td{
+                .address-td p{
                     word-wrap: break-word;
-                }
-                tbody tr{
-                    &:hover{
-                        background-color: rgba(239, 241, 251, 0.815);
-                    }
-                }
-                button{
-                    border: none;
-                    margin: 4px 0;  
-                    outline: none;
-                    padding: 8px 2px;
-                    color: rgba(0, 0, 0, 0.705);
-                    background-color: transparent;
-                    font-weight: 500;
-                    color: rgb(238, 118, 118);
-    
-                    &:hover{
-                        color:rgb(235, 78, 78);
-                    }
+                    width: 150px;
                 }
             }
         }
